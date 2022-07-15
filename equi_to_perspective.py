@@ -6,6 +6,7 @@ import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+# Adjust parameters here
 output_width = 512
 output_height = 512
 euler_angles = [0, 2.5*math.pi/4, 0]
@@ -18,17 +19,16 @@ video = cv2.VideoCapture(input_filename)
 ret, input = video.read()
 vid_len = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
-#input = cv2.cvtColor(cv2.imread("im.jpg"), cv2.COLOR_BGR2RGB)
 input_width = input.shape[1]
 input_height = input.shape[0]
-print("input size", input_width, input_height)
+print("Input video size", input_width, input_height)
 
+# Construct projection, rotation matrices.
 camera_matrix = np.array([
     [focal_length, 0, output_width/2],
     [0, focal_length, output_height/2],
     [0, 0, 1]
     ])
-
 inv_camera_matrix = np.linalg.inv(camera_matrix)
 rotation = Rotation.from_euler("xyz", euler_angles)
 rotation_matrix = rotation.as_matrix()
@@ -39,9 +39,14 @@ y_coords = np.repeat(output_height - np.arange(output_height)[:,None,None], outp
 z_coords = np.ones([output_height, output_width, 1])
 coords = np.concatenate([x_coords, y_coords, z_coords], axis=2)[...,None]
 
+# Inverse project to 3d.
 coords_3d = np.matmul(inv_camera_matrix[None,None,...], coords)
+
+# Normalise length to 1
 coords_3d_len = np.sqrt(coords_3d[:,:,0,:]**2 + coords_3d[:,:,1,:]**2 + coords_3d[:,:,2,:]**2)
 coords_3d_norm = coords_3d / coords_3d_len[:,:,None,:]
+
+# Rotate as desired.
 coords_3d_rotated = np.matmul(rotation_matrix[None,None,...], coords_3d_norm)
 
 if show_steps:
