@@ -64,9 +64,11 @@ if show_steps:
     plt.colorbar()
     plt.show()
 
+# Find rotation angles theta and phi (yaw and pitch).
 theta = -np.arctan2(coords_3d_rotated[:,:,2,0], coords_3d_rotated[:,:,0,0])
 phi = np.arcsin(coords_3d_rotated[:,:,1,0])
 
+# Convert to pixel locations in input equirectangular image.
 equi_location_x = (input_width * (theta + math.pi) / (2*math.pi)).astype(np.float32)
 equi_location_y = (input_height * (phi + math.pi/2) / math.pi).astype(np.float32)
 
@@ -89,19 +91,24 @@ if show_steps:
     plt.colorbar()
     plt.show()
 
+# Remap first frame using this and display
 remapped = cv2.remap(input, equi_location_x, equi_location_y, interpolation=cv2.INTER_CUBIC)
 
 if show_steps:
     plt.imshow(remapped)
+    plt.title("Remapped frame 0")
     plt.show()
 
+# Make writer, write first frame
 output = cv2.VideoWriter(output_filename, VideoWriter_fourcc("m", "p", "4", "v"), 30, remapped.shape[:2])
-
 output.write(remapped)
 
+# Process and write remaining frames, show progress bar.
 for i in tqdm(range(vid_len-1)):
     ret, image = video.read()
     if ret:
         remapped = cv2.remap(image, equi_location_x, equi_location_y, interpolation=cv2.INTER_CUBIC)
         output.write(remapped)
+
+# Release video writer to finalise output.
 output.release()
