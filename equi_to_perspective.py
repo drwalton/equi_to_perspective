@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 # Adjust parameters here
-output_width = 512
-output_height = 512
-euler_angles = [0, 2.5*math.pi/4, 0]
-focal_length = 0.4*output_width
-input_filename = "mediapipe.mov"
-output_filename = "output.mp4"
-show_steps = False
+output_width = 1024
+output_height = 1024
+#euler_angles = [-math.pi/2, 2.5*math.pi/4, 0] # For GS0100075
+euler_angles = [-math.pi/2, -math.pi/2, 0] # For GS0100076
+focal_length = 0.3*output_width
+input_filename = "GS010076.mov"
+output_filename = "GS010076_persp1024.mp4"
+show_steps = True
 
 video = cv2.VideoCapture(input_filename)
 ret, input = video.read()
